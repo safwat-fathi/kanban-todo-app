@@ -2,9 +2,9 @@
   <div class="w-1/4 bg-gray-100 p-2 rounded">
     <h2 class="text-xl font-bold mb-2">{{ title }}</h2>
     <draggable
-      :list="tasks.value"
-      group="tasks"
-      @end="onDragEnd"
+      :list="tasks"
+      :group="{ name: 'tasks', pull: true, put: true }"
+      @change="onDragChange"
       class="space-y-2"
       item-key="id"
     >
@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ComputedRef } from 'vue';
+import { defineProps, defineEmits } from 'vue';
 import draggable from 'vuedraggable';
 import TaskCard from './TaskCard.vue';
 import { Task } from '../types/task';
@@ -34,8 +34,9 @@ import { Task } from '../types/task';
 const props = defineProps<{
   title: string;
   status: Task['status'];
-  tasks: ComputedRef<Task[]>;
+  tasks: Task[];
 }>();
+
 const emits = defineEmits([
   'move-task',
   'add-task',
@@ -43,8 +44,10 @@ const emits = defineEmits([
   'delete-task',
 ]);
 
-const onDragEnd = (event: any) => {
-  const movedTask = event.item;
-  emits('move-task', movedTask.id, props.status);
+const onDragChange = (event: any) => {
+  if (event.added) {
+    const task = event.added.element as Task;
+    emits('move-task', task.id, props.status);
+  }
 };
 </script>

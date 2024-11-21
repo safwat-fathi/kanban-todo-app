@@ -52,6 +52,7 @@
     <TaskFormModal
       v-if="showTaskFormModal"
       :task="selectedTask"
+      :isEdit="isEdit"
       @save="saveTask"
       @close="closeTaskModal"
     />
@@ -59,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useTaskStore } from '../store/useTaskStore';
 import KanbanColumn from './KanbanColumn.vue';
 import TaskFormModal from './TaskFormModal.vue';
@@ -71,23 +72,28 @@ const taskStore = useTaskStore();
 const showTaskFormModal = ref(false);
 const selectedTask = ref<Task | null>(null);
 const searchQuery = ref('');
+const isEdit = ref(false);
 
 /**
  * Filter tasks by status and search query.
  * @param status - The status of the tasks to filter.
  * @returns A computed ref of tasks matching the status and search query.
  */
+// const tasksByStatus = (status: Task['status']) => {
+//   return computed(() =>
+//     taskStore.tasks.filter(
+//       task =>
+//         task.status === status &&
+//         (task.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+//           task.description
+//             ?.toLowerCase()
+//             .includes(searchQuery.value.toLowerCase()))
+//     )
+//   );
+// };
+
 const tasksByStatus = (status: Task['status']) => {
-  return computed(() =>
-    taskStore.tasks.filter(
-      task =>
-        task.status === status &&
-        (task.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-          task.description
-            ?.toLowerCase()
-            .includes(searchQuery.value.toLowerCase()))
-    )
-  );
+  return taskStore.tasks.filter(task => task.status === status);
 };
 
 /**
@@ -104,9 +110,13 @@ const moveTask = (taskId: string, newStatus: Task['status']) => {
  * @param status - The status to assign to the new task.
  */
 const openAddTaskModal = (status: Task['status']) => {
+  isEdit.value = false; // We're adding a new task
   selectedTask.value = {
     id: nanoid(),
     title: '',
+    description: '',
+    dueDate: '',
+    priority: 'low',
     status,
     createdAt: new Date().toISOString(),
   };
@@ -118,6 +128,7 @@ const openAddTaskModal = (status: Task['status']) => {
  * @param taskId - The ID of the task to edit.
  */
 const openEditTaskModal = (taskId: string) => {
+  isEdit.value = true; // We're editing an existing task
   const task = taskStore.tasks.find(task => task.id === taskId);
   if (task) {
     selectedTask.value = { ...task };
@@ -154,7 +165,3 @@ const deleteTask = (taskId: string) => {
   taskStore.deleteTask(taskId);
 };
 </script>
-
-<style scoped>
-/* Add any styles specific to KanbanBoard.vue here */
-</style>

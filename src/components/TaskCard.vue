@@ -22,7 +22,6 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { defineProps, defineEmits } from 'vue';
 import { Task } from '../types/task';
 
 const props = defineProps<{
@@ -56,7 +55,3 @@ const formattedDueDate = computed(() => {
     : '';
 });
 </script>
-
-<style scoped>
-/* Add any styles specific to TaskCard.vue here */
-</style>

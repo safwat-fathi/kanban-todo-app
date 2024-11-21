@@ -13,7 +13,3 @@ onMounted(() => {
   taskStore.loadTasks();
 });
 </script>
-
-<style>
-/* You can add global styles here or leave it empty */
-</style>
