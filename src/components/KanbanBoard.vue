@@ -1,4 +1,5 @@
 <template>
+  <h1 class="text-5xl font-bold text-center my-8">Todo Kanban Board</h1>
   <div class="p-4">
     <!-- Search Input -->
     <input
@@ -9,11 +10,12 @@
     />
 
     <!-- Kanban Columns -->
-    <div class="flex space-x-4">
+    <div class="space-x-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
       <KanbanColumn
         title="Todo"
         status="todo"
         :tasks="tasksByStatus('todo')"
+        :searchQuery="searchQuery"
         @move-task="moveTask"
         @add-task="openAddTaskModal"
         @edit-task="openEditTaskModal"
@@ -23,6 +25,7 @@
         title="In Progress"
         status="inProgress"
         :tasks="tasksByStatus('inProgress')"
+        :searchQuery="searchQuery"
         @move-task="moveTask"
         @add-task="openAddTaskModal"
         @edit-task="openEditTaskModal"
@@ -32,6 +35,7 @@
         title="In Review"
         status="inReview"
         :tasks="tasksByStatus('inReview')"
+        :searchQuery="searchQuery"
         @move-task="moveTask"
         @add-task="openAddTaskModal"
         @edit-task="openEditTaskModal"
@@ -41,6 +45,7 @@
         title="Done"
         status="done"
         :tasks="tasksByStatus('done')"
+        :searchQuery="searchQuery"
         @move-task="moveTask"
         @add-task="openAddTaskModal"
         @edit-task="openEditTaskModal"
@@ -77,21 +82,8 @@ const isEdit = ref(false);
 /**
  * Filter tasks by status and search query.
  * @param status - The status of the tasks to filter.
- * @returns A computed ref of tasks matching the status and search query.
+ * @returns An array of tasks matching the status and search query.
  */
-// const tasksByStatus = (status: Task['status']) => {
-//   return computed(() =>
-//     taskStore.tasks.filter(
-//       task =>
-//         task.status === status &&
-//         (task.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-//           task.description
-//             ?.toLowerCase()
-//             .includes(searchQuery.value.toLowerCase()))
-//     )
-//   );
-// };
-
 const tasksByStatus = (status: Task['status']) => {
   return taskStore.tasks.filter(task => task.status === status);
 };

@@ -24,7 +24,7 @@
 import { computed } from 'vue';
 import { Task } from '../types/task';
 
-const props = defineProps<{
+const { task } = defineProps<{
   task: Task;
 }>();
 
@@ -34,7 +34,7 @@ const emits = defineEmits(['edit-task', 'delete-task']);
  * Compute the CSS class based on task priority.
  */
 const priorityClass = computed(() => {
-  switch (props.task.priority) {
+  switch (task.priority) {
     case 'high':
       return 'border-l-4 border-red-500';
     case 'medium':
@@ -50,8 +50,6 @@ const priorityClass = computed(() => {
  * Format the due date for display.
  */
 const formattedDueDate = computed(() => {
-  return props.task.dueDate
-    ? new Date(props.task.dueDate).toLocaleDateString()
-    : '';
+  return task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '';
 });
 </script>

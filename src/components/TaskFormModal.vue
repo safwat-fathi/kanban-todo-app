@@ -6,6 +6,7 @@
       <h2 class="text-xl font-bold mb-4">{{ isEditText }}</h2>
       <form @submit.prevent="onSubmit">
         <!-- Title -->
+        <!-- Title -->
         <div class="mb-4">
           <label class="block text-gray-700">Title</label>
           <input
@@ -13,6 +14,7 @@
             type="text"
             class="w-full px-3 py-2 border rounded"
           />
+          <span class="text-red-500">{{ titleError }}</span>
         </div>
         <!-- Description -->
         <div class="mb-4">
@@ -65,17 +67,18 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, computed, watch, reactive } from 'vue';
+import { computed, watch, reactive, ref } from 'vue';
 import { Task } from '../types/task';
 
-const props = defineProps<{
+const { task, isEdit } = defineProps<{
   task: Task | null;
   isEdit: boolean;
 }>();
 
 const emits = defineEmits(['save', 'close']);
 
-const isEditText = computed(() => (props.isEdit ? 'Edit Task' : 'Add Task'));
+const isEditText = computed(() => (isEdit ? 'Edit Task' : 'Add Task'));
+const titleError = ref('');
 
 const formData = reactive({
   title: '',
@@ -84,9 +87,9 @@ const formData = reactive({
   priority: 'low',
 });
 
-// Watch for changes in props.task and update formData
+// Watch for changes in task and update formData
 watch(
-  () => props.task,
+  () => task,
   newTask => {
     formData.title = newTask?.title || '';
     formData.description = newTask?.description || '';
@@ -97,8 +100,15 @@ watch(
 );
 
 const onSubmit = () => {
+  if (!formData.title.trim()) {
+    titleError.value = 'Title is required';
+    return;
+  } else {
+    titleError.value = '';
+  }
+
   emits('save', {
-    ...props.task,
+    ...task,
     ...formData,
     updatedAt: new Date().toISOString(),
   });

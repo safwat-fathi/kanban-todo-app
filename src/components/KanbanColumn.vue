@@ -1,5 +1,5 @@
 <template>
-  <div class="w-1/4 bg-gray-100 p-2 rounded">
+  <div class="bg-gray-100 p-2 rounded">
     <h2 class="text-xl font-bold mb-2">{{ title }}</h2>
 
     <div class="relative">
@@ -10,7 +10,7 @@
         No tasks in this column.
       </div>
       <draggable
-        :list="tasks"
+        :list="filteredTasks"
         :group="{ name: 'tasks', pull: true, put: true }"
         @change="onDragChange"
         class="space-y-2 min-h-[100px] bg-white rounded-md p-2"
@@ -36,15 +36,16 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
 import draggable from 'vuedraggable';
 import TaskCard from './TaskCard.vue';
 import { Task } from '../types/task';
+import { computed } from 'vue';
 
-const props = defineProps<{
+const { title, status, tasks, searchQuery } = defineProps<{
   title: string;
   status: Task['status'];
   tasks: Task[];
+  searchQuery: string;
 }>();
 
 const emits = defineEmits([
@@ -54,6 +55,40 @@ const emits = defineEmits([
   'delete-task',
 ]);
 
+const priorityOrder = {
+  high: 1,
+  medium: 2,
+  low: 3,
+};
+
+/**
+ * Computed property to filter tasks based on status and search query.
+ * Also handles updates to the task list when tasks are moved.
+ */
+const filteredTasks = computed({
+  get() {
+    return tasks
+      .filter(
+        task =>
+          task.status === status &&
+          (task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            task.description?.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+      .sort(
+        (a, b) =>
+          priorityOrder[a.priority || 'low'] -
+          priorityOrder[b.priority || 'low']
+      );
+  },
+  set(newTasks: Task[]) {
+    newTasks.forEach(task => {
+      if (task.status !== status) {
+        emits('move-task', task.id, status);
+      }
+    });
+  },
+});
+
 /**
  * Handle the change event when items are moved.
  * @param event - The drag event object.
@@ -61,7 +96,7 @@ const emits = defineEmits([
 const onDragChange = (event: any) => {
   if (event.added) {
     const task = event.added.element as Task;
-    emits('move-task', task.id, props.status);
+    emits('move-task', task.id, status);
   }
 };
 </script>
